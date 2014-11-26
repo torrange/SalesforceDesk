@@ -53,17 +53,9 @@ class DeskCRM(object):
         return response
 
     def articles_search(self, query):
-        url_vars = (self.base_uri, 
-            query["text"], 
-            query["topic_ids"], 
-            query["brand_ids"], 
-            query["in_support_center"])
-        articles_url = "%s/articles/search?" 
-        articles_url = articles_url + "text=%s&" 
-        articles_url = articles_url + "topic_ids=%s&"
-        articles_url = articles_url + "brand_ids=%s&"
-        articles_url = articles_url + "in_support_center=%s"
-        articles_url = articles_url % url_vars
+        articles_url = "%s/arcticles/search?" % self.base_uri
+        for key, value in query.iteritems():    
+            articles_url = "%s%s=%s&" % (articles_url, key, value)
         r = self.s.get(articles_url)
         response =  loads(r.content)
         return response
@@ -147,7 +139,22 @@ class DeskCRM(object):
         r = self.s.get(cases_url)
         response =  loads(r.content)
         return response
-    
+
+    def cases_search(self, query):
+        cases_url = "%s/cases/search?" % self.base_uri
+        for key, value in query.iteritems():    
+            cases_url = "%s%s=%s&" % (cases_url, key, value)
+        r = self.s.get(cases_url)
+        response =  loads(r.content)
+        return response
+
+    def cases_show(self, case_id):
+        url_vars = (self.base_uri, case_id)
+        cases_url = "%s/cases/%s" % url_vars
+        r = self.s.get(cases_url)
+        response =  loads(r.content)
+        return response
+
     def cases_case_create(self, case):  
         url_vars = (self.base_uri)
         cases_url = "%s/cases" % url_vars
@@ -155,9 +162,26 @@ class DeskCRM(object):
         response =  loads(r.content)
         return response
 
+    def cases_case_update(self, case, case_id):  
+        url_vars = (self.base_uri, case_id)
+        cases_url = "%s/cases/%s" % url_vars
+        r = self.s.patch(cases_url, data=dumps(case))
+        response =  loads(r.content)
+        return response
 
+    def cases_case_delete(self, case, case_id):  
+        url_vars = (self.base_uri, case_id)
+        cases_url = "%s/cases/%s" % url_vars
+        r = self.s.delete(cases_url, data=dumps(case))
+        response =  loads(r.content)
+        return response
 
-
+    def cases_case_forward(self, data, case_id):  
+        url_vars = (self.base_uri, case_id)
+        cases_url = "%s/cases/%s/forward" % url_vars
+        r = self.s.post(cases_url, data=dumps(data))
+        response =  loads(r.content)
+        return response
 
 
 
