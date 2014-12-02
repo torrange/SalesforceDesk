@@ -133,9 +133,15 @@ class DeskCRM(object):
 ###################
 
 
-    def cases_list(self):
+    def cases_list(self, query=None):
         url_vars = (self.base_uri)
-        cases_url = "%s/cases" % url_vars
+        if query != None:
+            cases_url = "%s/cases?" % url_vars
+            for key, value in query.iteritems():
+                cases_url = "%s%s=%s&" % (cases_url, key, value)
+            cases_url = cases_url[0:-1]
+        else:
+            cases_url = "%s/cases" % url_vars
         r = self.s.get(cases_url)
         response =  loads(r.content)
         return response
@@ -193,14 +199,93 @@ class DeskCRM(object):
     def cases():
         pass
 
-    def companies():
-        pass
+#####################
+# COMPANIES METHODS #
+#####################
 
-    def customFields():
-        pass
+    def companies_list(self):
+        url_vars = (self.base_uri)
+        companies_url = "%s/companies" % url_vars
+        r = self.s.get(companies_url)
+        response =  loads(r.content)
+        return response
 
-    def customers():
-        pass
+
+    def companies_show(self, company_id):
+        url_vars = (self.base_uri, company_id)
+        companies_url = "%s/companies/%s" % url_vars
+        r = self.s.get(companies_url)
+        response =  loads(r.content)
+        return response
+
+
+    def companies_create(self, company):
+        url_vars = (self.base_uri)
+        companies_url = "%s/companies" % url_vars
+        r = self.s.post(companies_url, data=dumps(company))
+        response =  loads(r.content)
+        return response
+
+#    def companies_search(self, query):
+#        companies_url = "%s/companies/search?" % self.base_uri
+#        for key, value in query.iteritems():    
+#            companies_url = "%s%s=%s&" % (companies_url, key, value)
+#        r = self.s.get(companies_url[0:-1])
+#        response =  loads(r.content)
+#        return response
+
+
+    def companies_search(self, query):
+        '''Provide a query object. eg: {"q":crm_id}''' 
+        companies_url = "%s/companies/search" % self.base_uri
+        r = self.s.get(companies_url, data=dumps(query))
+        response =  loads(r.content)
+        return response
+
+
+
+########################
+# customFields methods #
+########################
+
+
+    def customFields(self):
+        url_vars = (self.base_uri)
+        customFields_url = "%s/custom_fields" % url_vars
+        r = self.s.get(customFields_url)
+        response =  loads(r.content)
+        return response
+
+ 
+#####################  
+# CUSTOMERS METHODS #
+#####################
+
+    def customers_list(self):
+        url_vars = (self.base_uri)
+        customers_url = "%s/customers" % url_vars
+        r = self.s.get(customers_url)
+        response =  loads(r.content)
+        return response
+
+
+    def customers_show(self, customer_id):
+        url_vars = (self.base_uri, customer_id)
+        customers_url = "%s/customers/%s" % url_vars
+        r = self.s.get(customers_url)
+        response =  loads(r.content)
+        return response
+
+
+    def customers_create(self, customer):
+        url_vars = (self.base_uri)
+        customers_url = "%s/customers" % url_vars
+        r = self.s.post(customers_url, data=dumps(customer))
+        response =  loads(r.content)
+        return response
+
+
+
 
     def eTags():
         pass
@@ -215,7 +300,7 @@ class DeskCRM(object):
         pass
 
     def filters():
-        pass
+        pass    
 
     def groups():
         pass
