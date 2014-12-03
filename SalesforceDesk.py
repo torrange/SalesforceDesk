@@ -146,6 +146,7 @@ class DeskCRM(object):
         response =  loads(r.content)
         return response
 
+
     def cases_search(self, query):
         cases_url = "%s/cases/search?" % self.base_uri
         for key, value in query.iteritems():    
@@ -189,16 +190,6 @@ class DeskCRM(object):
         response =  loads(r.content)
         return response
 
-
-
-
-
-    def brands():
-        pass
-
-    def cases():
-        pass
-
 #####################
 # COMPANIES METHODS #
 #####################
@@ -225,14 +216,6 @@ class DeskCRM(object):
         r = self.s.post(companies_url, data=dumps(company))
         response =  loads(r.content)
         return response
-
-#    def companies_search(self, query):
-#        companies_url = "%s/companies/search?" % self.base_uri
-#        for key, value in query.iteritems():    
-#            companies_url = "%s%s=%s&" % (companies_url, key, value)
-#        r = self.s.get(companies_url[0:-1])
-#        response =  loads(r.content)
-#        return response
 
 
     def companies_search(self, query):
@@ -284,7 +267,12 @@ class DeskCRM(object):
         response =  loads(r.content)
         return response
 
-
+    def customers_list_cases(self, customer_id):
+        url_vars = (self.base_uri, customer_id)
+        customers_url = "%s/customers/%s/cases" % url_vars
+        r = self.s.get(customers_url)
+        response =  loads(r.content)
+        return response
 
 
     def eTags():
@@ -346,3 +334,61 @@ class DeskCRM(object):
 
     def users():
         pass
+
+
+class CrmTools(DeskCRM):
+    def transfer_record(self, doc):
+        company = {}
+        customer = {}
+
+        #get vars from lead
+        crm_id = doc["id"]
+        company_name = doc["business"]
+        tel_no = doc["customer_phone"]
+        customer_name = doc["customer_name"]
+        external_url = doc["external"]
+        internal_url = doc["internal"]
+        email = doc["email"]
+        crm_url = "http://reports-bonline.appspot.com/sites/search?query=%s" % crm_id
+        status = doc["status"]
+        
+        #build company object
+        company["name"] =  company_name
+        if len(external_url) > 4:
+            company["domains"] = [external_url]    
+        company["custom_fields"] = {}
+        company["custom_fields"]["crm_id"] = crm_id
+        company["custom_fields"]["crm_url"] = crm_url
+        company["custom_fields"]["internal_url"] = internal_url
+        
+        # Create the company in Desk and store the Desk URL
+
+        company_create =  self.companies_create(company)
+        #print company_create
+        company_url = company_create["_links"]["self"]["href"]
+   
+        #build customer object
+        #customer["emails"] = [email]
+        try:
+            first_name = customer_name.split(" ")[0]
+            last_name = customer_name.split(" ")[-1]
+        except:
+            first_name = customer_name
+            last_name = "na"
+        
+        customer["first_name"] = first_name
+        customer["last_name"] = last_name
+        customer["custom_fields"] = {}
+        customer["custom_fields"]["crm_id"] = crm_id
+        customer["custom_fields"]["crm_url"] = crm_url
+        customer["custom_fields"]["internal_url"] = internal_url
+        customer["_links"] = {}
+        customer["_links"]["company"] = {}
+        customer["_links"]["company"]["href"] = company_url
+        customer["_links"]["company"]["class"] = "company"
+
+        customer_create =  self.customers_create(customer)
+        customer["customer_url"] = customer_create["_links"]["self"]["href"]
+        transfer_object = {"company":company, "customer":customer}
+        
+        return transfer_object
