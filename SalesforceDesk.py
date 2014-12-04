@@ -4,6 +4,7 @@ from json import loads, dumps
 
 class DeskCRM(object):
     def __init__(self, user, secret):
+        '''Init with Desk user & password. Only basic auth atm.'''
         self.user, self.secret = user, secret
         self.auth = (self.user, self.secret)
         self.base_uri = "https://bonline.desk.com/api/v2"
@@ -16,15 +17,17 @@ class DeskCRM(object):
 ## ARTICLES METHODS ##
 ######################
 
-
     def articles_list(self):
+        '''return list of articles'''
         url_vars = (self.base_uri)
-        articles_url = "%s/arcticles" % url_vars
+        articles_url = "%s/articles" % url_vars
+        print
         r = self.s.get(articles_url)
         response =  loads(r.content)
         return response
 
     def articles_show(self, article_id):
+        '''show a single article'''
         url_vars = (self.base_uri, article_id)
         articles_url = "%s/articles/%s" % url_vars
         r = self.s.get(articles_url)
@@ -32,6 +35,7 @@ class DeskCRM(object):
         return response
 
     def articles_create(self, article):
+        '''create article'''
         url_vars = (self.base_uri)
         articles_url = "%s/articles" % url_vars
         r = self.s.post(articles_url, data=loads(article))
@@ -39,6 +43,7 @@ class DeskCRM(object):
         return response
 
     def articles_update(self, article_id, article):
+        '''update article'''
         url_vars = (self.base_uri, article_id)
         articles_url = "%s/articles/%s" % url_vars
         r = self.s.patch(articles_url, data=loads(article))
@@ -46,6 +51,7 @@ class DeskCRM(object):
         return response
 
     def articles_delete(self, article_id):
+        '''delete article'''
         url_vars = (self.base_uri, article_id)
         articles_url = "%s/articles/%s" % url_vars
         r = self.s.delete(articles_url)
@@ -53,6 +59,7 @@ class DeskCRM(object):
         return response
 
     def articles_search(self, query):
+        '''search articles'''
         articles_url = "%s/arcticles/search?" % self.base_uri
         for key, value in query.iteritems():    
             articles_url = "%s%s=%s&" % (articles_url, key, value)
@@ -61,6 +68,7 @@ class DeskCRM(object):
         return response
 
     def articles_list_attachments(self, article_id):
+        '''list attachments for article'''
         url_vars = (self.base_uri, article_id)
         articles_url = "%s/articles/%s/attachments" % url_vars
         r = self.s.get(articles_url)
@@ -127,11 +135,9 @@ class DeskCRM(object):
         response =  loads(r.content)
         return response
 
-
 ###################  
 #  CASES METHODS  #
 ###################
-
 
     def cases_list(self, query=None):
         url_vars = (self.base_uri)
@@ -146,11 +152,11 @@ class DeskCRM(object):
         response =  loads(r.content)
         return response
 
-
     def cases_search(self, query):
         cases_url = "%s/cases/search?" % self.base_uri
         for key, value in query.iteritems():    
             cases_url = "%s%s=%s&" % (cases_url, key, value)
+        cases_url = cases_url[0:-1]
         r = self.s.get(cases_url)
         response =  loads(r.content)
         return response
@@ -201,14 +207,12 @@ class DeskCRM(object):
         response =  loads(r.content)
         return response
 
-
     def companies_show(self, company_id):
         url_vars = (self.base_uri, company_id)
         companies_url = "%s/companies/%s" % url_vars
         r = self.s.get(companies_url)
         response =  loads(r.content)
         return response
-
 
     def companies_create(self, company):
         url_vars = (self.base_uri)
@@ -217,7 +221,6 @@ class DeskCRM(object):
         response =  loads(r.content)
         return response
 
-
     def companies_search(self, query):
         '''Provide a query object. eg: {"q":crm_id}''' 
         companies_url = "%s/companies/search" % self.base_uri
@@ -225,12 +228,9 @@ class DeskCRM(object):
         response =  loads(r.content)
         return response
 
-
-
 ########################
 # customFields methods #
 ########################
-
 
     def customFields(self):
         url_vars = (self.base_uri)
@@ -238,7 +238,6 @@ class DeskCRM(object):
         r = self.s.get(customFields_url)
         response =  loads(r.content)
         return response
-
  
 #####################  
 # CUSTOMERS METHODS #
@@ -251,7 +250,6 @@ class DeskCRM(object):
         response =  loads(r.content)
         return response
 
-
     def customers_show(self, customer_id):
         url_vars = (self.base_uri, customer_id)
         customers_url = "%s/customers/%s" % url_vars
@@ -259,11 +257,20 @@ class DeskCRM(object):
         response =  loads(r.content)
         return response
 
-
     def customers_create(self, customer):
         url_vars = (self.base_uri)
         customers_url = "%s/customers" % url_vars
         r = self.s.post(customers_url, data=dumps(customer))
+        response =  loads(r.content)
+        return response
+
+    def customers_search(self, query):
+        '''Provide a query object. eg: {"q":crm_id}''' 
+        customers_url = "%s/customers/search?" % self.base_uri
+        for key, value in query.iteritems():    
+            customers_url = "%s%s=%s&" % (customers_url, key, value)
+        customers_url = customers_url[0:-1]
+        r = self.s.get(customers_url)
         response =  loads(r.content)
         return response
 
@@ -273,7 +280,6 @@ class DeskCRM(object):
         r = self.s.get(customers_url)
         response =  loads(r.content)
         return response
-
 
     def eTags():
         pass
@@ -336,7 +342,7 @@ class DeskCRM(object):
         pass
 
 
-class CrmTools(DeskCRM):
+class CRMTools(DeskCRM):
     def transfer_record(self, doc):
         company = {}
         customer = {}
@@ -361,10 +367,8 @@ class CrmTools(DeskCRM):
         company["custom_fields"]["crm_url"] = crm_url
         company["custom_fields"]["internal_url"] = internal_url
         
-        # Create the company in Desk and store the Desk URL
-
+        # Create company in Desk; get Desk URL
         company_create =  self.companies_create(company)
-        #print company_create
         company_url = company_create["_links"]["self"]["href"]
    
         #build customer object
@@ -386,9 +390,21 @@ class CrmTools(DeskCRM):
         customer["_links"]["company"] = {}
         customer["_links"]["company"]["href"] = company_url
         customer["_links"]["company"]["class"] = "company"
-
         customer_create =  self.customers_create(customer)
         customer["customer_url"] = customer_create["_links"]["self"]["href"]
-        transfer_object = {"company":company, "customer":customer}
         
+        #build transfer obejct 
+        transfer_object = {"company":company, "customer":customer}
         return transfer_object
+
+    def convert_crm_id(self, crm_id):
+        desk_id = None
+        customer_query = self.customers_search({"custom_crm_id": crm_id })
+        if len(customer_query["_embedded"]["entries"]) >= 1: 
+            desk_id = str(customer_query["_embedded"]["entries"][0]["id"])
+        return desk_id
+
+    def crm_get_cases(self, crm_id):
+        desk_id = self.convert_crm_id(crm_id)
+        cases = self.customers_list_cases(desk_id)
+        return cases
