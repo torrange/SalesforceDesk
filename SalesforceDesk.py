@@ -3,11 +3,11 @@ from requests import session
 from json import loads, dumps
 
 class DeskCRM(object):
-    def __init__(self, user, secret):
+    def __init__(self, user, secret, company):
         '''Init with Desk user & password. Only basic auth atm.'''
         self.user, self.secret = user, secret
         self.auth = (self.user, self.secret)
-        self.base_uri = "https://bonline.desk.com/api/v2"
+        self.base_uri = #"https://%s.desk.com/api/v2" % (company)
         self.s = session()
         self.s.headers["Accept"] = "application/json"
         self.s.headers["Content-Type"] =  "application/json"
@@ -355,7 +355,7 @@ class CRMTools(DeskCRM):
         external_url = doc["external"]
         internal_url = doc["internal"]
         email = doc["email"]
-        crm_url = "http://reports-bonline.appspot.com/sites/search?query=%s" % crm_id
+        crm_url = "http://reports-%s.appspot.com/sites/search?query=%s" % (company, crm_id)
         status = doc["status"]
         
         #build company object
